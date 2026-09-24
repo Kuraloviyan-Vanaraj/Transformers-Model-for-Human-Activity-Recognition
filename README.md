@@ -2,42 +2,37 @@
 
 A Master's project investigating **Transformer-based human activity recognition (HAR)** from wearable inertial sensor data.
 
-The experiments use the inertial modality of the **UTD-MHAD (UTD Multimodal Human Action Dataset)** and evaluate a Transformer sequence-classification model across a standard experiment, repeated runs, and 5-fold cross-validation.
+The project uses the inertial modality of the **UTD-MHAD (UTD Multimodal Human Action Dataset)** and includes a main train/test experiment, repeated runs, and 5-fold cross-validation.
 
 > **Dataset notice:** The UTD-MHAD data is intentionally **not included in this repository**. Download it separately from the official dataset page and place the inertial `.mat` files under `data/raw/inertial/`.
 
-## What this project does
+## Highlights
 
-The project treats inertial-sensor recordings as multivariate time series and uses a Transformer architecture to learn temporal dependencies for multi-class activity recognition.
-
-The original workflow includes:
-
-- sequence padding/truncation to a fixed length
-- feature standardization with `StandardScaler`
-- multi-class label encoding
-- noise-based augmentation in the experimental workflow
-- Transformer self-attention and positional information
-- Adam optimization
-- early stopping and learning-rate scheduling
-- confusion-matrix and per-class precision analysis
-- repeated training runs
-- stratified 5-fold cross-validation
+- Transformer-based sequence classification for inertial sensor time series
+- 27 human activity classes
+- Fixed-length sequence preparation with padding/truncation
+- Feature standardization with `StandardScaler`
+- Gaussian-noise augmentation in the experimental workflow
+- Multi-head self-attention with residual connections
+- Adam optimization, early stopping, and learning-rate scheduling
+- Accuracy, confusion matrix, and precision evaluation
+- Repeated experiments and stratified 5-fold cross-validation
 
 ## Dataset
 
-The project uses the **UTD-MHAD** dataset created by Chen Chen, Roozbeh Jafari, and Nasser Kehtarnavaz at the University of Texas at Dallas. The official dataset page describes 27 actions performed by 8 subjects and reports 861 usable sequences after three corrupted sequences were removed. The inertial sensor records acceleration and angular-velocity signals.
+The project uses **UTD-MHAD**, created by Chen Chen, Roozbeh Jafari, and Nasser Kehtarnavaz at the University of Texas at Dallas. The official project page describes 27 actions performed by 8 subjects and 861 usable sequences after three corrupted sequences were removed.
 
-### Download the dataset separately
+### Download separately
 
 1. Open the official UTD-MHAD page: https://personal.utdallas.edu/~kehtar/UTD-MHAD.html
-2. Download **`Inertial_Data.zip`** from the Download section.
+2. Download **`Inertial_Data.zip`**.
 3. Extract the `.mat` files into:
 
 ```text
 data/raw/inertial/
 ```
 
-The repository's `data/README.md` contains the same instructions and the dataset citation.
+See `data/README.md` for the dataset citation and setup details.
 
 ## Repository structure
 
@@ -49,52 +44,43 @@ The repository's `data/README.md` contains the same instructions and the dataset
 ├── .gitignore
 ├── data/
 │   └── README.md
-├── notebooks/
-│   ├── 01_transformer_activity_recognition.ipynb
-│   ├── 02_repeated_runs.ipynb
-│   └── 03_five_fold_cross_validation.ipynb
+├── src/
+│   ├── __init__.py
+│   ├── common.py
+│   ├── train.py
+│   ├── repeated_runs.py
+│   └── cross_validation.py
 ├── docs/
 │   └── PROJECT_NOTES.md
 └── results/
     └── README.md
 ```
 
-## Activity classes
-
-UTD-MHAD contains 27 action classes, including swipes, waving, clapping, throwing, drawing gestures, sports movements, boxing, walking/jogging, sit-to-stand, stand-to-sit, lunging, and squatting. The official page provides the complete numbered list.
+The original notebooks from the Master's project were refactored into importable Python modules so the public repository is easier to maintain and reproduce.
 
 ## Methodology
 
 ### 1. Data loading
 
-The notebooks load MATLAB inertial recordings with `scipy.io.loadmat` and extract the inertial signal used for classification.
+MATLAB inertial recordings are loaded with `scipy.io.loadmat`. Each filename encodes the action, subject, and trial.
 
 ### 2. Sequence preparation
 
-Sequences are converted to a fixed maximum length of 200 time steps through padding and truncation, matching the original project workflow.
+Sequences are padded or truncated to a maximum of 200 time steps.
 
 ### 3. Normalization
 
-Sensor features are standardized using `StandardScaler` before being passed to the model.
+Each sequence is flattened temporarily and standardized with `StandardScaler`, then reshaped for the Transformer.
 
 ### 4. Transformer model
 
-The model uses the standard Transformer building blocks: multi-head self-attention, feed-forward transformations, residual connections, normalization, dropout, and a final softmax classification layer.
+The model uses stacked multi-head self-attention blocks with batch normalization, ReLU activations, residual connections, global average pooling, dense layers, dropout, and a softmax classification head.
 
-### 5. Evaluation
+### 5. Experiments
 
-The experiments report accuracy, confusion matrices, per-class precision, and weighted precision. The repository also preserves the repeated-run and 5-fold cross-validation workflows from the Master's project.
-
-## Reported project results
-
-The original Master's report documents the following historical results:
-
-| Evaluation | Accuracy | Weighted precision |
-|---|---:|---:|
-| Standard train/test evaluation | 85.71% | 0.7648 |
-| 5-fold cross-validation | 92% average | 0.7548 |
-
-These are **results reported by the original project**, not a newly reproduced benchmark. Re-running the notebooks can produce different values depending on software versions, random seeds, hardware, preprocessing, and split details.
+- `src/train.py` — main train/test experiment
+- `src/repeated_runs.py` — repeated train/test runs
+- `src/cross_validation.py` — stratified 5-fold cross-validation
 
 ## Installation
 
@@ -109,38 +95,43 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Start Jupyter from the repository root:
+## Run
+
+Run everything from the repository root after downloading the dataset:
 
 ```bash
-jupyter notebook
+python -m src.train
+python -m src.repeated_runs
+python -m src.cross_validation
 ```
 
-## Run the experiments
+Generated model files and experiment artifacts belong under `results/` and are ignored by Git by default.
 
-Make sure the dataset has been extracted into `data/raw/inertial/`, then run the notebooks:
+## Reported project results
 
-```text
-01_transformer_activity_recognition.ipynb
-02_repeated_runs.ipynb
-03_five_fold_cross_validation.ipynb
-```
+The original Master's report documents these historical results:
 
-Generated plots, CSV files, model checkpoints, and other experiment artifacts can be stored under `results/` and are ignored by Git by default.
+| Evaluation | Accuracy | Weighted precision |
+|---|---:|---:|
+| Standard train/test evaluation | 85.71% | 0.7648 |
+| 5-fold cross-validation | 92% average | 0.7548 |
+
+These are **historical results from the original project**, not newly reproduced benchmark measurements. Re-running the experiments may produce different results because of software versions, random seeds, hardware, preprocessing, and split details.
 
 ## Reproducibility notes
 
-This repository preserves the original Master's-project notebooks rather than turning them into a production ML package. Before using the project as a research benchmark, verify:
+Before treating the project as a research benchmark, verify:
 
+- exact train/test split protocol
+- whether evaluation is subject-independent
+- preprocessing and scaler fitting order
 - random seeds and deterministic settings
-- the exact train/test split protocol
-- whether the split is subject-independent
-- preprocessing order and fitted scalers
-- TensorFlow and CUDA/cuDNN compatibility
+- TensorFlow/CUDA compatibility
 - dataset version and file integrity
 
 ## Future work
 
-Potential extensions include subject-independent evaluation, stronger experiment tracking, baseline comparisons against CNN/LSTM/GRU models, hyperparameter tuning, attention visualization, and multimodal fusion.
+Potential extensions include subject-independent evaluation, CNN/LSTM/GRU baselines, systematic hyperparameter tuning, experiment tracking, attention visualization, and multimodal sensor fusion.
 
 ## Dataset citation
 
