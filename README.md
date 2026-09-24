@@ -34,28 +34,6 @@ data/raw/inertial/
 
 See `data/README.md` for the dataset citation and setup details.
 
-## Repository structure
-
-```text
-.
-├── README.md
-├── LICENSE
-├── requirements.txt
-├── .gitignore
-├── data/
-│   └── README.md
-├── src/
-│   ├── __init__.py
-│   ├── common.py
-│   ├── train.py
-│   ├── repeated_runs.py
-│   └── cross_validation.py
-├── docs/
-│   └── PROJECT_NOTES.md
-└── results/
-    └── README.md
-```
-
 The original notebooks from the Master's project were refactored into importable Python modules so the public repository is easier to maintain and reproduce.
 
 ## Methodology
