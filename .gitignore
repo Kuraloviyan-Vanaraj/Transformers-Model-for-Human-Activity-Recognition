@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+.DS_Store
+*.h5
+*.keras
+*.ckpt
+checkpoints/
+models/
+results/*.csv
+results/*.json
+results/*.png
+results/*.jpg
+results/*.pdf
+# Dataset files are intentionally kept out of version control.
+data/raw/inertial/*.mat
